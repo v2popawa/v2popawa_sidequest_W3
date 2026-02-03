@@ -12,13 +12,14 @@
 // currentScreen === "start"
 function drawStart() {
   // Background colour for the start screen
-  background(180, 225, 220); // soft teal background
+  let greenShade = map(sin(frameCount * 0.05), -1, 1, 30, 100);
+  background(0, greenShade, 0); // green background
 
   // ---- Title text ----
-  fill(30, 50, 60);
-  textSize(46);
+  fill(200, 255, 200);
+  textSize(50);
   textAlign(CENTER, CENTER);
-  text("Win or Lose", width / 2, 180);
+  text("Escape Adventure", width / 2, 180);
 
   // ---- Buttons (data only) ----
   // These objects store the position/size/label for each button.

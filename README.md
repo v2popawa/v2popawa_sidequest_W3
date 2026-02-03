@@ -1,18 +1,22 @@
 ## Project Title
 
-GBDA302 Week 3 Example 1: Instructions Screen with Back button
+GBDA302 Week 3: Maze Game:Escape Adventure
 
 ---
 
 ## Authors
 
-Karen Cochrane and David Han
+Karen Cochrane, David Han and Vrunda Popawala
 
 ---
 
 ## Description
 
-This p5.js project demonstrates a simple multi-screen game structure using a state-based approach. The example includes a start screen, an instructions screen with a back button, a basic game screen, and win/lose outcome screens. The focus is on showing how to separate screens into different files, route input based on the current game state, and design simple UI elements such as buttons and keyboard controls.
+This p5.js project demonstrates a simple maze game where the user the keyboard to reach the red X. When the game open
+there start page has two button a "start" button and a "instruction" button. When the user clicks on the instruction button it
+explains the game rules. If the user clicks on the start button the game will begin and the user must go through the maze
+to reach the red X. When the user hits the red X the game is done and has the option to play again or return to the home page which
+is the start page.
 
 ---
 
@@ -35,5 +39,6 @@ N/A
 ## GenAI
 
 The code was written by Dr. Karen Cochrane but she used GenAI to write the comments.
+The game is build by GenAI
 
 ---

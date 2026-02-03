@@ -12,117 +12,188 @@
 // and interact with the button on the game screen.
 // Keeping this in one object makes it easier to move,
 // resize, or restyle the button later.
-const gameBtn = {
-  x: 400, // x position (centre of the button)
-  y: 550, // y position (centre of the button)
-  w: 260, // width
-  h: 90, // height
-  label: "PRESS HERE", // text shown on the button
-};
+
+// Character starting position
+// ------------------------------
+// Player & Game State
+// ------------------------------
+// Player
+let playerX = 50;
+let playerY = 50;
+let playerSize = 20;
+let speed = 3;
+
+// Finish X
+let finishX = 740;
+let finishY = 720;
+let finishSize = 40;
+
+// Maze walls
+let walls = [
+  [0, 0, 800, 20],
+  [0, 780, 800, 20],
+  [0, 0, 20, 800],
+  [780, 0, 20, 800],
+  [20, 120, 620, 20],
+  [160, 220, 620, 20],
+  [20, 320, 620, 20],
+  [160, 420, 620, 20],
+  [20, 520, 620, 20],
+  [160, 620, 620, 20],
+  [620, 120, 20, 120],
+  [160, 220, 20, 120],
+  [620, 320, 20, 120],
+  [160, 420, 20, 120],
+  [620, 520, 20, 120],
+  [300, 160, 20, 60],
+  [460, 260, 20, 60],
+  [300, 360, 20, 60],
+  [460, 460, 20, 60],
+  [300, 560, 20, 60],
+];
+
+// Game state
+let gameOver = false;
+let gameWon = false;
+
+// Buttons
+let playAgainBtn = { x: 400, y: 350, w: 200, h: 60, label: "Play Again" };
+let returnHomeBtn = { x: 400, y: 450, w: 200, h: 60, label: "Return Home" };
 
 // ------------------------------
-// Main draw function for this screen
+// Main game draw function
 // ------------------------------
-// drawGame() is called from main.js *only*
-// when currentScreen === "game"
 function drawGame() {
-  // Set background colour for the game screen
-  background(240, 230, 140);
+  background(0, 45, 0);
 
-  // ---- Title and instructions text ----
-  fill(0); // black text
-  textSize(32);
-  textAlign(CENTER, CENTER);
-  text("Game Screen", width / 2, 160);
+  // --- Handle movement ---
+  if (!gameOver && !gameWon) {
+    if (keyIsDown(LEFT_ARROW)) playerX -= speed;
+    if (keyIsDown(RIGHT_ARROW)) playerX += speed;
+    if (keyIsDown(UP_ARROW)) playerY -= speed;
+    if (keyIsDown(DOWN_ARROW)) playerY += speed;
 
-  textSize(18);
-  text(
-    "Click the button (or press ENTER) for a random result.",
-    width / 2,
-    210,
-  );
+    // --- Check collision with walls ---
+    for (let i = 0; i < walls.length; i++) {
+      let wx = walls[i][0];
+      let wy = walls[i][1];
+      let ww = walls[i][2];
+      let wh = walls[i][-5];
 
-  // ---- Draw the button ----
-  // We pass the button object to a helper function
-  drawGameButton(gameBtn);
+      // Use player's bounding box for collision
+      if (
+        playerX + playerSize / 2 > wx &&
+        playerX - playerSize / 2 < wx + ww &&
+        playerY + playerSize / 2 > wy &&
+        playerY - playerSize / 2 < wy + wh
+      ) {
+        gameOver = true;
+      }
+    }
 
-  // ---- Cursor feedback ----
-  // If the mouse is over the button, show a hand cursor
-  // Otherwise, show the normal arrow cursor
-  cursor(isHover(gameBtn) ? HAND : ARROW);
-}
+    // --- Check if player reaches finish ---
+    if (
+      playerX + playerSize / 2 > finishX - finishSize / 2 &&
+      playerX - playerSize / 2 < finishX + finishSize / 2 &&
+      playerY + playerSize / 2 > finishY - finishSize / 2 &&
+      playerY - playerSize / 2 < finishY + finishSize / 2
+    ) {
+      gameWon = true;
+    }
+  }
 
-// ------------------------------
-// Button drawing helper
-// ------------------------------
-// This function is responsible *only* for drawing the button.
-// It does NOT handle clicks or game logic.
-function drawGameButton({ x, y, w, h, label }) {
-  rectMode(CENTER);
-
-  // Check if the mouse is hovering over the button
-  // isHover() is defined in main.js so it can be shared
-  const hover = isHover({ x, y, w, h });
-
+  // --- Draw walls ---
+  fill(101, 67, 33);
   noStroke();
+  for (let i = 0; i < walls.length; i++) {
+    rect(walls[i][0], walls[i][1], walls[i][2], walls[i][3]);
+  }
 
-  // Change button colour when hovered
-  // This gives visual feedback to the player
-  fill(
-    hover
-      ? color(180, 220, 255, 220) // lighter blue on hover
-      : color(200, 220, 255, 190), // normal state
+  // --- Draw finish X ---
+  push();
+  stroke(255, 0, 0);
+  strokeWeight(6);
+  line(
+    finishX - finishSize / 2,
+    finishY - finishSize / 2,
+    finishX + finishSize / 2,
+    finishY + finishSize / 2,
   );
+  line(
+    finishX + finishSize / 2,
+    finishY - finishSize / 2,
+    finishX - finishSize / 2,
+    finishY + finishSize / 2,
+  );
+  pop();
 
-  // Draw the button rectangle
-  rect(x, y, w, h, 14); // last value = rounded corners
+  // --- Draw player triangle ---
+  push();
+  fill(0, 120, 255);
+  noStroke();
+  triangle(
+    playerX,
+    playerY - playerSize / 2,
+    playerX - playerSize / 2,
+    playerY + playerSize / 2,
+    playerX + playerSize / 2,
+    playerY + playerSize / 2,
+  );
+  pop();
 
-  // Draw the button text
+  // --- Draw overlay if game over / win ---
+  if (gameOver || gameWon) {
+    fill(0, 150);
+    rectMode(CENTER);
+    rect(400, 400, 800, 800);
+
+    fill(255);
+    textSize(36);
+    textAlign(CENTER, CENTER);
+    text(gameWon ? "You Win!" : "You Hit a Wall!", 400, 250);
+
+    drawButton(playAgainBtn);
+    drawButton(returnHomeBtn);
+  }
+}
+
+// ------------------------------
+// Draw button helper
+// ------------------------------
+function drawButton(btn) {
+  rectMode(CENTER);
+  fill(200);
+  rect(btn.x, btn.y, btn.w, btn.h, 10);
   fill(0);
-  textSize(28);
+  textSize(24);
   textAlign(CENTER, CENTER);
-  text(label, x, y);
+  text(btn.label, btn.x, btn.y);
 }
 
 // ------------------------------
-// Mouse input for this screen
+// Handle mouse press for buttons
 // ------------------------------
-// This function is called from main.js
-// only when currentScreen === "game"
 function gameMousePressed() {
-  // Only trigger the outcome if the button is clicked
-  if (isHover(gameBtn)) {
-    triggerRandomOutcome();
+  // Play Again button
+  if (
+    mouseX > playAgainBtn.x - playAgainBtn.w / 2 &&
+    mouseX < playAgainBtn.x + playAgainBtn.w / 2 &&
+    mouseY > playAgainBtn.y - playAgainBtn.h / 2 &&
+    mouseY < playAgainBtn.y + playAgainBtn.h / 2
+  ) {
+    playerX = 50;
+    playerY = 50;
+    gameOver = false;
+    gameWon = false;
   }
-}
 
-// ------------------------------
-// Keyboard input for this screen
-// ------------------------------
-// Allows keyboard-only interaction (accessibility + design)
-function gameKeyPressed() {
-  // ENTER key triggers the same behaviour as clicking the button
-  if (keyCode === ENTER) {
-    triggerRandomOutcome();
-  }
-}
-
-// ------------------------------
-// Game logic: win or lose
-// ------------------------------
-// This function decides what happens next in the game.
-// It does NOT draw anything.
-function triggerRandomOutcome() {
-  // random() returns a value between 0 and 1
-  // Here we use a 50/50 chance:
-  // - less than 0.5 → win
-  // - 0.5 or greater → lose
-  //
-  // You can bias this later, for example:
-  // random() < 0.7 → 70% chance to win
-  if (random() < 0.5) {
-    currentScreen = "win";
-  } else {
-    currentScreen = "lose";
+  // Return Home button
+  if (
+    mouseX > returnHomeBtn.x - returnHomeBtn.w / 2 &&
+    mouseX < returnHomeBtn.x + returnHomeBtn.w / 2 &&
+    mouseY > returnHomeBtn.y - returnHomeBtn.h / 2 &&
+    mouseY < returnHomeBtn.y + returnHomeBtn.h / 2
+  ) {
+    currentScreen = "start"; // switch to home screen
   }
 }
